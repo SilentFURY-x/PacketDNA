@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PacketDNA - Intelligent Network Traffic Fingerprinting and Application Classification using Statistical Flow Analysis. Privacy-preserving encrypted traffic classification.">
+    <title>PacketDNA — Intelligent Network Traffic Classification</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar__brand">
+            <div class="navbar__logo">🧬</div>
+            <div>
+                <div class="navbar__title">PacketDNA</div>
+                <div class="navbar__subtitle">Traffic Classification Engine</div>
+            </div>
+        </div>
+        <div class="navbar__nav">
+            <button class="navbar__link active" data-page="dashboard" id="nav-dashboard">
+                📊 Dashboard
+            </button>
+            <button class="navbar__link" data-page="analyze" id="nav-analyze">
+                🔬 Analyze
+            </button>
+            <button class="navbar__link" data-page="flows" id="nav-flows">
+                🌐 Flows
+            </button>
+            <button class="navbar__link" data-page="model" id="nav-model">
+                🤖 Model
+            </button>
+        </div>
+        <div class="navbar__status">
+            <span class="navbar__status-dot"></span>
+            <span class="navbar__status-text">System Online</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main" id="main-content">
+
+        <!-- ============ DASHBOARD PAGE ============ -->
+        <div id="page-dashboard" class="page active">
+            <!-- Hero -->
+            <section class="hero">
+                <div class="hero__badge">🧬 v0.3.0 — 30% Development Complete</div>
+                <h1 class="hero__title">
+                    Network Traffic<br>
+                    <span class="hero__title-gradient">Fingerprinting Engine</span>
+                </h1>
+                <p class="hero__description">
+                    Privacy-preserving traffic classification that identifies applications
+                    from encrypted flows using statistical fingerprints — no payload inspection required.
+                </p>
+                <div class="hero__actions">
+                    <button class="btn btn--primary btn--lg" id="btn-run-demo">
+                        🚀 Run Demo Analysis
+                    </button>
+                    <button class="btn btn--ghost btn--lg" id="btn-go-analyze">
+                        📤 Upload PCAP File
+                    </button>
+                </div>
+            </section>
+
+            <!-- Pipeline Visualization -->
+            <section class="section">
+                <div class="pipeline" id="pipeline">
+                    <div class="pipeline__step" id="step-parse">
+                        <span class="pipeline__step-icon">📦</span>
+                        <span class="pipeline__step-label">Parse PCAP</span>
+                    </div>
+                    <span class="pipeline__arrow">→</span>
+                    <div class="pipeline__step" id="step-extract">
+                        <span class="pipeline__step-icon">🔀</span>
+                        <span class="pipeline__step-label">Extract Flows</span>
+                    </div>
+                    <span class="pipeline__arrow">→</span>
+                    <div class="pipeline__step" id="step-features">
+                        <span class="pipeline__step-icon">📐</span>
+                        <span class="pipeline__step-label">Compute Features</span>
+                    </div>
+                    <span class="pipeline__arrow">→</span>
+                    <div class="pipeline__step" id="step-classify">
+                        <span class="pipeline__step-icon">🤖</span>
+                        <span class="pipeline__step-label">Classify</span>
+                    </div>
+                    <span class="pipeline__arrow">→</span>
+                    <div class="pipeline__step" id="step-visualize">
+                        <span class="pipeline__step-icon">📊</span>
+                        <span class="pipeline__step-label">Visualize</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Grid -->
+            <section class="section" id="stats-section" style="display:none;">
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card stat-card--primary animate-in stagger-1">
+                        <div class="stat-card__icon stat-card__icon--primary">📦</div>
+                        <div class="stat-card__value" id="stat-packets">—</div>
+                        <div class="stat-card__label">Packets Analyzed</div>
+                    </div>
+                    <div class="stat-card animate-in stagger-2">
+                        <div class="stat-card__icon stat-card__icon--success">🌐</div>
+                        <div class="stat-card__value" id="stat-flows">—</div>
+                        <div class="stat-card__label">Flows Extracted</div>
+                    </div>
+                    <div class="stat-card animate-in stagger-3">
+                        <div class="stat-card__icon stat-card__icon--warning">🎯</div>
+                        <div class="stat-card__value" id="stat-accuracy">—</div>
+                        <div class="stat-card__label">Classification Accuracy</div>
+                    </div>
+                    <div class="stat-card animate-in stagger-4">
+                        <div class="stat-card__icon stat-card__icon--info">⚡</div>
+                        <div class="stat-card__value" id="stat-time">—</div>
+                        <div class="stat-card__label">Processing Time</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Grid -->
+            <section class="section" id="charts-section" style="display:none;">
+                <div class="dashboard-grid">
+                    <!-- Traffic Classification Distribution -->
+                    <div class="card animate-in">
+                        <div class="card__header">
+                            <h2 class="card__title">Traffic Classification</h2>
+                            <span class="badge badge--primary">Doughnut</span>
+                        </div>
+                        <div class="card__body">
+                            <div class="chart-container">
+                                <canvas id="chart-classification"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Protocol Distribution -->
+                    <div class="card animate-in">
+                        <div class="card__header">
+                            <h2 class="card__title">Protocol Distribution</h2>
+                            <span class="badge badge--info">Bar</span>
+                        </div>
+                        <div class="card__body">
+                            <div class="chart-container">
+                                <canvas id="chart-protocol"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Importance -->
+                <div class="card animate-in" id="feature-importance-card">
+                    <div class="card__header">
+                        <h2 class="card__title">Feature Importance Analysis</h2>
+                        <span class="badge badge--success">Random Forest</span>
+                    </div>
+                    <div class="card__body">
+                        <div class="feature-grid" id="feature-importance-grid">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ ANALYZE PAGE ============ -->
+        <div id="page-analyze" class="page hidden">
+            <div class="section-header">
+                <div>
+                    <h1 class="section-header__title">Analyze Traffic</h1>
+                    <p class="section-header__subtitle">Upload a PCAP file for automated traffic classification</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="upload-zone" id="upload-zone">
+                    <div class="upload-zone__icon">📤</div>
+                    <div class="upload-zone__title">Drop your PCAP file here</div>
+                    <div class="upload-zone__subtitle">
+                        Supports .pcap, .pcapng, .cap — Max 100MB
+                    </div>
+                    <input type="file" class="upload-zone__input" id="file-input"
+                           accept=".pcap,.pcapng,.cap">
+                </div>
+
+                <div id="upload-progress" class="hidden" style="margin-top: var(--space-6);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                        <span class="upload-zone__subtitle" id="upload-status">Uploading...</span>
+                        <span class="upload-zone__subtitle" id="upload-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar__fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Results (shown after analysis) -->
+            <div id="analysis-results" class="hidden" style="margin-top: var(--space-8);">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-header__title">Analysis Results</h2>
+                        <p class="section-header__subtitle" id="result-summary"></p>
+                    </div>
+                    <button class="btn btn--secondary" id="btn-export-results">📥 Export JSON</button>
+                </div>
+
+                <div class="stats-grid" id="result-stats-grid">
+                    <!-- Dynamically populated -->
+                </div>
+
+                <div class="dashboard-grid" style="margin-top: var(--space-6);">
+                    <div class="card">
+                        <div class="card__header">
+                            <h2 class="card__title">Classification Results</h2>
+                        </div>
+                        <div class="card__body">
+                            <div class="chart-container">
+                                <canvas id="chart-result-classification"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card__header">
+                            <h2 class="card__title">Protocol Breakdown</h2>
+                        </div>
+                        <div class="card__body">
+                            <div class="chart-container">
+                                <canvas id="chart-result-protocol"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ FLOWS PAGE ============ -->
+        <div id="page-flows" class="page hidden">
+            <div class="section-header">
+                <div>
+                    <h1 class="section-header__title">Network Flows</h1>
+                    <p class="section-header__subtitle">Detailed view of extracted and classified network flows</p>
+                </div>
+                <div style="display: flex; gap: var(--space-3);">
+                    <button class="btn btn--secondary btn--sm" id="btn-filter-all">All</button>
+                    <button class="btn btn--ghost btn--sm" id="btn-filter-tcp">TCP</button>
+                    <button class="btn btn--ghost btn--sm" id="btn-filter-udp">UDP</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="table-container flow-table-wrapper">
+                    <table class="table" id="flows-table">
+                        <thead>
+                            <tr>
+                                <th>Flow ID</th>
+                                <th>Source</th>
+                                <th>Destination</th>
+                                <th>Protocol</th>
+                                <th>Packets</th>
+                                <th>Bytes</th>
+                                <th>Duration</th>
+                                <th>Classification</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="flows-tbody">
+                            <!-- Dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="empty-state" id="flows-empty">
+                    <div class="empty-state__icon">🌐</div>
+                    <h3 class="empty-state__title">No Flows Available</h3>
+                    <p class="empty-state__description">
+                        Run a demo analysis or upload a PCAP file to see extracted network flows.
+                    </p>
+                    <button class="btn btn--primary" id="btn-flows-demo">Run Demo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ MODEL PAGE ============ -->
+        <div id="page-model" class="page hidden">
+            <div class="section-header">
+                <div>
+                    <h1 class="section-header__title">ML Model Details</h1>
+                    <p class="section-header__subtitle">Classification model architecture and performance metrics</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card__icon stat-card__icon--primary">🤖</div>
+                    <div class="stat-card__value">RF</div>
+                    <div class="stat-card__label">Model Type</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__icon stat-card__icon--success">📐</div>
+                    <div class="stat-card__value">22</div>
+                    <div class="stat-card__label">Statistical Features</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__icon stat-card__icon--warning">🏷️</div>
+                    <div class="stat-card__value">12</div>
+                    <div class="stat-card__label">Traffic Classes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card__icon stat-card__icon--info">🌳</div>
+                    <div class="stat-card__value">100</div>
+                    <div class="stat-card__label">Estimators</div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid" style="margin-top: var(--space-6);">
+                <div class="card">
+                    <div class="card__header">
+                        <h2 class="card__title">Feature Categories</h2>
+                    </div>
+                    <div class="card__body">
+                        <div style="display: grid; gap: var(--space-4);">
+                            <div>
+                                <h4 style="color: var(--color-accent-primary); margin-bottom: var(--space-2); font-size: var(--font-size-sm);">
+                                    📏 Packet Size Statistics
+                                </h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                                    <span class="feature-tag">fwd_pkt_size_mean</span>
+                                    <span class="feature-tag">fwd_pkt_size_std</span>
+                                    <span class="feature-tag">fwd_pkt_size_min</span>
+                                    <span class="feature-tag">fwd_pkt_size_max</span>
+                                    <span class="feature-tag">bwd_pkt_size_mean</span>
+                                    <span class="feature-tag">bwd_pkt_size_std</span>
+                                    <span class="feature-tag">bwd_pkt_size_min</span>
+                                    <span class="feature-tag">bwd_pkt_size_max</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--color-accent-success); margin-bottom: var(--space-2); font-size: var(--font-size-sm);">
+                                    ⏱️ Inter-Arrival Time
+                                </h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                                    <span class="feature-tag">fwd_iat_mean</span>
+                                    <span class="feature-tag">fwd_iat_std</span>
+                                    <span class="feature-tag">bwd_iat_mean</span>
+                                    <span class="feature-tag">bwd_iat_std</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--color-accent-warning); margin-bottom: var(--space-2); font-size: var(--font-size-sm);">
+                                    📊 Flow Aggregates
+                                </h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                                    <span class="feature-tag">flow_duration</span>
+                                    <span class="feature-tag">flow_byte_rate</span>
+                                    <span class="feature-tag">flow_packet_rate</span>
+                                    <span class="feature-tag">total_fwd_bytes</span>
+                                    <span class="feature-tag">total_bwd_bytes</span>
+                                    <span class="feature-tag">total_packets</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--color-accent-tertiary); margin-bottom: var(--space-2); font-size: var(--font-size-sm);">
+                                    📈 Ratio Features
+                                </h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                                    <span class="feature-tag">fwd_bwd_packet_ratio</span>
+                                    <span class="feature-tag">fwd_bwd_byte_ratio</span>
+                                    <span class="feature-tag">avg_payload_size</span>
+                                    <span class="feature-tag">pkt_size_variation</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h2 class="card__title">Supported Traffic Classes</h2>
+                    </div>
+                    <div class="card__body">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--primary">🌐</span>
+                                <span>Web Browsing</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--danger">📺</span>
+                                <span>Video Streaming</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--success">📁</span>
+                                <span>File Transfer</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--warning">📞</span>
+                                <span>VoIP</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--info">🎮</span>
+                                <span>Gaming</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--primary">✉️</span>
+                                <span>Email</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--danger">🔒</span>
+                                <span>VPN</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--success">🔗</span>
+                                <span>P2P</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--warning">💬</span>
+                                <span>Social Media</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--info">☁️</span>
+                                <span>Cloud Storage</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--primary">🔍</span>
+                                <span>DNS</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--danger">❓</span>
+                                <span>Unknown</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: var(--space-6);">
+                <div class="card__header">
+                    <h2 class="card__title">Analysis Pipeline Architecture</h2>
+                </div>
+                <div class="card__body" style="font-family: var(--font-mono); font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 2;">
+                    <pre style="overflow-x: auto; color: var(--color-text-secondary);">
+┌─────────────┐    ┌─────────────────┐    ┌──────────────────┐    ┌──────────────┐    ┌─────────────┐
+│  PCAP File   │───▶│  Flow Extractor  │───▶│  Feature Engine   │───▶│  ML Classifier│───▶│  Dashboard   │
+│  (.pcap)     │    │  (5-tuple hash)  │    │  (22 features)    │    │  (Random      │    │  (Charts +   │
+│              │    │  Bidirectional   │    │  Packet sizes     │    │   Forest)     │    │   Tables)    │
+│              │    │  flow grouping   │    │  IAT statistics   │    │              │    │              │
+└─────────────┘    └─────────────────┘    │  Flow aggregates  │    │  KNN         │    │  Export JSON │
+                                           │  Ratio features   │    │  Decision    │    │              │
+                                           └──────────────────┘    │  Tree        │    └─────────────┘
+                                                                    └──────────────┘
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>PacketDNA v0.3.0 — Computer Networks Course Project — 
+            Built with Flask, scikit-learn, Chart.js</p>
+        <p style="margin-top: var(--space-2);">
+            Privacy-preserving traffic classification using statistical flow analysis
+        </p>
+    </footer>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
